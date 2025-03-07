@@ -1,6 +1,17 @@
 int x = 0;
 
 x = 5*5+1-22;
-int y = (2+2)*4;
+int y = (2+2)*4+(-5);
+
+if(1){
+	int z = x*y;
+	if(0){
+		obliterate(z-y);
+	}
+	if(1){
+		z = z+2;
+		obliterate(z);
+	}
+}
 
 obliterate(y-x);

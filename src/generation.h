@@ -133,9 +133,8 @@ void generate_statement(struct String* output, union NodeStmt statement){
 	switch(statement.type){
 		case _obliterate:{ // Exit program
 			gen_expr(output,statement.exit.expr);
-			pushback_string(*output,"	mov rax, 60\n");
 			pop_reg(output,"rdi");
-			pushback_string(*output,"	syscall\n");
+			pushback_string(*output,"	call _exit\n");
 			break;
 		}case _int_dcl:{ // Declaration of int variable
 			if(varmap_contains(var_map,statement.int_dcl.identifier.value) != -1) error("Identifier %s already declared!",statement.int_dcl.identifier.value);
@@ -188,7 +187,9 @@ char* generate_assembly(struct NodeProg prog){
 	lbl_count=0;
 	
 	// Initialize the assembly program
-	pushback_string(output,"global _start\n_start:\n");
+	pushback_string(output,"section .text\n"); // Start the asembly program's text section (where the code is)
+	pushback_string(output,"_exit:\n	mov rax, 60\n	syscall\n"); // Exit label for shorter assembly programs
+	pushback_string(output,"global _start\n_start:\n"); // Declare the _start label, which is the entry label
 	
 	// Go through each parsed statement and generate the according assembly
 	for(int i=0; i<prog.size; i++){
@@ -196,7 +197,7 @@ char* generate_assembly(struct NodeProg prog){
 	}
 	
 	// Add the exit code at the end in case no obliterate was used in the program
-	pushback_string(output,"	mov rax, 60\n	mov rdi, 0\n	syscall\n");
+	pushback_string(output,"	mov rdi, 0\n	call _exit\n");
 	
 	// Free the variables
 	free_vector(var_map);
