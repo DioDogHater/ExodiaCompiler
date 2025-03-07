@@ -3,20 +3,26 @@
 
 // Possible types of tokens
 enum TokenType{
+	// Keywords
 	_obliterate,
-	_int_lit,
-	_semicolon,
-	_open_paren,
-	_close_paren,
-	_equal_sign,
 	_int_dcl,
+	_int_lit,
 	_identifier,
-	_add,
-	_mult,
-	_sub,
-	_div,
+	_if,
+	// Symbols
+	_semicolon,
+	_open_paren, _close_paren,
+	_open_bracket, _close_bracket,
+	_equal_sign,
+	_add, _sub,
+	_mult, _div,
 	_mod,
-	_bin_expr // <- Only used in parsing and generation
+	_equal_to, _not_equal,
+	_greater, _greater_equ,
+	_lower, _lower_equ,
+	// Types for parsing and generation
+	_bin_expr,
+	_negation // otherwise, substraction will be confused with negation
 };
 
 // A single token
@@ -36,6 +42,24 @@ void free_token_vector(struct TokenVector vector){
 	if(vector.arr!=NULL){
 		for(int i=0;i<vector.size;i++) { if(vector.arr[i].value!=NULL) free(vector.arr[i].value); }
 		free(vector.arr);
+	}
+}
+
+// 
+int get_binary_prec(struct Token tk){
+	switch(tk.type){
+		case _add:
+			return 0;
+		case _sub:
+			return 0;
+		case _mult:
+			return 1;
+		case _div:
+			return 1;
+		case _mod:
+			return 1;
+		default:
+			return -1;
 	}
 }
 
@@ -74,6 +98,9 @@ struct TokenVector tokenize(char* str){
 			
 			else if(!strcmp(token_str,"int"))
 				token=(struct Token){_int_dcl,NULL};
+			
+			else if(!strcmp(token_str,"if"))
+				token=(struct Token){_if,NULL};
 			
 			// In case of other token, we deduce it's an indentifier and we dont free the token_str buffer
 			else{
@@ -114,7 +141,9 @@ struct TokenVector tokenize(char* str){
 		// Ponctuation tokens or special character tokens
 		else{
 			// If it's whitespace, just ignore it
-			if(isspace(str[i])) { i++; continue; }
+			if(isspace(str[i]) || !isprint(str[i])) { i++; continue; }
+			// Default, if stays, then dont consider token
+			token=(struct Token){_obliterate,NULL};
 			// Check which token can be used for the character
 			switch(str[i]){
 				case ';': // Ends the statement
@@ -127,7 +156,11 @@ struct TokenVector tokenize(char* str){
 					token=(struct Token){_close_paren,NULL};
 					break;
 				case '=':
-					token=(struct Token){_equal_sign,NULL};
+					if(i+1<str_len && str[i+1] == '='){
+						token=(struct Token){_equal_to,NULL};
+						i++;
+					}else
+						token=(struct Token){_equal_sign,NULL};
 					break;
 				case '+':
 					token=(struct Token){_add,NULL};
@@ -139,12 +172,52 @@ struct TokenVector tokenize(char* str){
 					token=(struct Token){_sub,NULL};
 					break;
 				case '/':
-					token=(struct Token){_div,NULL};
+					if(i+1<str_len && str[i+1] == '/'){
+						i+=2; // Skip the "//"
+						while(i<str_len && str[i] != '\n') i++; // Skip until end of line
+					}else if(i+1<str_len && str[i+1] == '*'){
+						i+=2; // Skip the "/*"
+						while(i<str_len && i+1<str_len && str[i] != '*' || str[i+1] != '/') i++; // Skip until we reach the * of "*/"
+						i+=2; // Skip the last slash
+					}else
+						token=(struct Token){_div,NULL};
+					break;
+				case '%':
+					token=(struct Token){_mod,NULL};
+					break;
+				case '{':
+					token=(struct Token){_open_bracket,NULL};
+					break;
+				case '}':
+					token=(struct Token){_close_bracket,NULL};
+					break;
+				case '>':
+					if(i+1<str_len && str[i+1] == '='){
+						token=(struct Token){_greater_equ,NULL};
+						i++;
+					}else
+						token=(struct Token){_greater,NULL};
+					break;
+				case '<':
+					if(i+1<str_len && str[i+1] == '='){
+						token=(struct Token){_lower_equ,NULL};
+						i++;
+					}else
+						token=(struct Token){_lower,NULL};
+					break;
+				case '!':
+					printf("'%c' == '!'\n",str[i]);
+					if(i+1<str_len && str[i+1] == '='){
+						token=(struct Token){_not_equal,NULL};
+						i++;
+					}else
+						error("stray symbol '!'!");
 					break;
 				default: // We have an undefined token, so throw an error
-					error("stray symbol %c!",str[i]);
+					error("stray symbol '%c'!",str[i]);
 			}
-			pushback(tokens,token);
+			if(token.type != _obliterate)
+				pushback(tokens,token);
 		}
 		// In case we didnt find anything, just skip to the next character
 		i++;

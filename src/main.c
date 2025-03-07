@@ -36,21 +36,26 @@ int main(int argc, char* argv[]){
 	
 	// Load source code, tokenize it and store the tokens in a TokenVector
 	struct TokenVector tokens=tokenize(f_contents);
-	//printf("ANALYSIS:\n");
-	//for(int i=0; i<tokens.size; i++){
-	//	printf("token with type %d!\nValue: %s\n",tokens.arr[i].type,tokens.arr[i].value==NULL?"NULL":tokens.arr[i].value);
-	//}
 	free(f_contents);
+	printf("Finished tokenization!\n");
+	
+	/*
+	printf("\nDEBUG:\n");
+	for(int i=0; i<tokens.size; i++){
+		printf("token #%d\nid: %d\nvalue: %s\n\n",i,at(tokens,i).type,at(tokens,i).value);
+	}
+	*/
 	
 	// Parse through our tokens and create a parse tree
-	
 	set_parse_tokens(tokens);
 	struct NodeProg parse_tree=(struct NodeProg){NULL,0};
 	parse(&parse_tree);
+	printf("Finished parsing!\n");
 	
 	// Generate our assembly code with the parse tree
 	char* asm_str=generate_assembly(parse_tree);
-	printf("ASM:\n%s",asm_str);
+	printf("Finished generation!\n");
+	//printf("ASM:\n%s",asm_str);
 	write_output_file("out.asm",asm_str);
 	free(asm_str);
 	

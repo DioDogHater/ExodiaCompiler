@@ -80,7 +80,7 @@ struct ArenaAlloc{
 	size_t pos;
 	size_t size;
 };
-#define arena_free(a) ({if((a).ptr != NULL) free((a).ptr);})
+#define arena_free(a) ({if((a).ptr != NULL) free((a).ptr);(a).ptr=NULL;})
 void arena_init(struct ArenaAlloc* a, size_t sz){
 	if(a->ptr != NULL) free(a->ptr);
 	*a=(struct ArenaAlloc){(char*)malloc(sz),0,sz};
