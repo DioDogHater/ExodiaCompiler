@@ -125,7 +125,32 @@ void gen_expr(struct String* output, union NodeExpr expr){
 				error("unimplemented binary expression!");
 		}
 	}else
-		error("unknown expression type!");
+		error("unknown expression type %d!",expr.type);
+}
+
+void gen_condition(struct String* output, union NodeExpr expr, int lbl_num){
+	// TODO -> add support for boolean operators (&& and ||)
+	if(expr.type != _bin_expr){
+		gen_expr(output,expr);
+		pop_reg(output,"rax");
+		pushback_string(*output,"	test rax, rax\n");
+		pushback_string(*output,"	jz lbl%d\n",lbl_num);
+	}else{
+		char* cmp_instr=get_cond_jump_opp(expr.bin_expr.op);
+		if(cmp_instr == NULL){
+			gen_expr(output,expr);
+			pop_reg(output,"rax");
+			pushback_string(*output,"	test rax, rax\n");
+			pushback_string(*output,"	jz lbl%d\n",lbl_num);
+		}else{
+			gen_expr(output,*expr.bin_expr.lhs);
+			gen_expr(output,*expr.bin_expr.rhs);
+			pop_reg(output,"rax");
+			pop_reg(output,"rbx");
+			pushback_string(*output,"	cmp rbx, rax\n");
+			pushback_string(*output,"	%s lbl%d\n",cmp_instr,lbl_num);
+		}
+	}
 }
 
 // generate_statement() prototype
@@ -170,10 +195,7 @@ void generate_statement(struct String* output, union NodeStmt statement, union N
 			break;
 		}case _if:{
 			int lbl_num=lbl_count++;
-			gen_expr(output,statement.if_stmt.expr);
-			pop_reg(output,"rax");
-			pushback_string(*output,"	test rax, rax\n");
-			pushback_string(*output,"	jz lbl%d\n",lbl_num);
+			gen_condition(output,statement.if_stmt.expr,lbl_num);
 			begin_scope();
 			for(int i=0; i<statement.if_stmt.scope.size; i++)
 				gen_statement(output,statement.if_stmt.scope,i);

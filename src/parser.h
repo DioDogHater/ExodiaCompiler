@@ -175,6 +175,27 @@ bool parse_expr(union NodeExpr* expr_node, int min_prec){
 	}return false; // If the first token isnt a term, there is no expression
 }
 
+// Get condition if available
+bool parse_condition(union NodeExpr* expr_node){
+	union NodeExpr lhs;
+	union NodeExpr rhs;
+	// Get the left hand side expression
+	if(parse_expr(&lhs,0)){
+		if(!in_tks()) return false;
+		struct Token op_token=peek();
+		if(get_cond_jump(op_token.type) == NULL) { *expr_node=lhs; return true; }
+		consume();
+		if(!parse_expr(&rhs,0)) error("Expected 2nd expression in condition!");
+		expr_node->bin_expr=(struct NodeBinExpr){_bin_expr,op_token.type,NULL,NULL};
+		expr_node->bin_expr.lhs=(union NodeExpr*)arena_alloc(&node_alloc,sizeof(union NodeExpr));
+		*expr_node->bin_expr.lhs=lhs;
+		expr_node->bin_expr.rhs=(union NodeExpr*)arena_alloc(&node_alloc,sizeof(union NodeExpr));
+		*expr_node->bin_expr.rhs=rhs;
+		return true;
+	}
+	return false;
+}
+
 // Get statement if available
 bool parse_statement(union NodeStmt* statement){
 	if(get_token(_obliterate)){
@@ -220,7 +241,7 @@ bool parse_statement(union NodeStmt* statement){
 		if_stmt.type=_if; consume();
 		if(get_token(_open_paren)) consume();
 		else error("Missing '('!");
-		if(!parse_expr(&if_stmt.expr,0))
+		if(!parse_condition(&if_stmt.expr))
 			error("Invalid expression!");
 		if(get_token(_close_paren)) consume();
 		else error("Missing ')'!");

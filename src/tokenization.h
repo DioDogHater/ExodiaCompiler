@@ -46,7 +46,7 @@ void free_token_vector(struct TokenVector vector){
 	}
 }
 
-// 
+// Returns the precedence value of arithmetic operator
 int get_binary_prec(struct Token tk){
 	switch(tk.type){
 		case _add:
@@ -62,6 +62,43 @@ int get_binary_prec(struct Token tk){
 		default:
 			return -1;
 	}
+}
+
+// Returns the conditional jump instruction that is the opposite of a condition
+char* get_cond_jump_opp(enum TokenType type){
+	switch(type){
+		case _equal_to:
+			return "jne";
+		case _not_equal:
+			return "je";
+		case _greater:
+			return "jle";
+		case _greater_equ:
+			return "jl";
+		case _lower:
+			return "jg";
+		case _lower_equ:
+			return "jge";
+	}
+	return NULL;
+}
+
+char* get_cond_jump(enum TokenType type){
+	switch(type){
+		case _equal_to:
+			return "je";
+		case _not_equal:
+			return "jne";
+		case _greater:
+			return "jg";
+		case _greater_equ:
+			return "jge";
+		case _lower:
+			return "jl";
+		case _lower_equ:
+			return "jle";
+	}
+	return NULL;
 }
 
 // Turns str into tokens
@@ -85,7 +122,7 @@ struct TokenVector tokenize(char* str){
 			// Start here
 			token_start=i;
 			// End only when we either find a non-alphanumeric character or we reach the end of str
-			while(isalnum(str[i]) && i<str_len){
+			while(i<str_len && isalnum(str[i])){
 				token_end=++i;
 			}
 			// Allocate and setup the token string buffer
@@ -126,7 +163,7 @@ struct TokenVector tokenize(char* str){
 			// Start here
 			token_start=i;
 			// End only when we either find a non-alphanumeric character or we reach the end of str
-			while(isdigit(str[i]) && i<str_len){
+			while(i<str_len && isdigit(str[i])){
 				token_end=++i;
 			}
 			// Allocate the buffer and set it up

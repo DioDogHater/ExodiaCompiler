@@ -9,13 +9,14 @@ void load_input_file(char* filepath){
 	fseek(fptr,0L,SEEK_END); // Get size
 	f_size=ftell(fptr);
 	rewind(fptr); // Go back to start of file
-	f_contents=(char*)malloc(f_size);
+	f_contents=(char*)malloc(f_size+1);
 	if(f_contents == NULL) { perror("Something went wrong allocating memory!\nExiting compilation...\n"); exit(-1); }
 	if(fread(f_contents,1,f_size,fptr) != f_size){
 		fprintf(stderr,"Something went wrong while reading data...\nRead should be of expected size of %d bytes!\n",(int)f_size);
 		fclose(fptr);
 		exit(-1);
-	}fclose(fptr);
+	}f_contents[f_size]='\0';
+	fclose(fptr);
 	fptr=NULL;
 }
 
@@ -39,12 +40,12 @@ int main(int argc, char* argv[]){
 	free(f_contents);
 	printf("Finished tokenization!\n");
 	
-	/*
+	
 	printf("\nDEBUG:\n");
 	for(int i=0; i<tokens.size; i++){
 		printf("token #%d\nid: %d\nvalue: %s\n\n",i,at(tokens,i).type,at(tokens,i).value);
 	}
-	*/
+	
 	
 	// Parse through our tokens and create a parse tree
 	set_parse_tokens(tokens);
