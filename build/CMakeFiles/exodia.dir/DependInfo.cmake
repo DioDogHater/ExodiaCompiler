@@ -8,7 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/mnt/c/Users/chris/OneDrive/Documents/Code/C-C++/Exodia/src/main.c" "CMakeFiles/exodia.dir/src/main.c.o" "gcc" "CMakeFiles/exodia.dir/src/main.c.o.d"
+  "/mnt/c/Users/14389/Desktop/Code/Github/ExodiaCompiler/src/main.c" "CMakeFiles/exodia.dir/src/main.c.o" "gcc" "CMakeFiles/exodia.dir/src/main.c.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

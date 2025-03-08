@@ -9,6 +9,7 @@ enum TokenType{
 	_int_lit,
 	_identifier,
 	_if,
+	_else,
 	// Symbols
 	_semicolon,
 	_open_paren, _close_paren,
@@ -101,6 +102,9 @@ struct TokenVector tokenize(char* str){
 			
 			else if(!strcmp(token_str,"if"))
 				token=(struct Token){_if,NULL};
+			
+			else if(!strcmp(token_str,"else"))
+				token=(struct Token){_else,NULL};
 			
 			// In case of other token, we deduce it's an indentifier and we dont free the token_str buffer
 			else{

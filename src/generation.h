@@ -55,6 +55,7 @@ void end_scope(struct String* output){
 		}
 	}
 	popback(scope_vector);
+	stack_size-=pop_count;
 }
 
 // Create a label
@@ -102,12 +103,14 @@ void gen_expr(struct String* output, union NodeExpr expr){
 			case _div:
 				pop_reg(output,"rbx");
 				pop_reg(output,"rax");
+				pushback_string(*output,"	xor rdx, rdx\n");
 				pushback_string(*output,"	idiv rbx\n");
 				push_reg(output,"rax");
 				break;
 			case _mod:
 				pop_reg(output,"rbx");
 				pop_reg(output,"rax");
+				pushback_string(*output,"	xor rdx, rdx\n");
 				pushback_string(*output,"	idiv rbx\n");
 				push_reg(output,"rdx");
 				break;
@@ -126,10 +129,17 @@ void gen_expr(struct String* output, union NodeExpr expr){
 }
 
 // generate_statement() prototype
-void generate_statement(struct String* output, union NodeStmt statement);
+void generate_statement(struct String* output, union NodeStmt statement, union NodeStmt* last, union NodeStmt* next);
+
+#define gen_statement(o,sv,index) ({\
+	generate_statement((o), at((sv),(index)),\
+		((index)>0) ? &(at((sv),(index)-1)) : NULL,\
+		((index)+1<(sv).size) ? &(at((sv),(index)+1)) : NULL\
+	);\
+})
 
 // Generate assembly for statement
-void generate_statement(struct String* output, union NodeStmt statement){
+void generate_statement(struct String* output, union NodeStmt statement, union NodeStmt* last, union NodeStmt* next){
 	switch(statement.type){
 		case _obliterate:{ // Exit program
 			gen_expr(output,statement.exit.expr);
@@ -155,7 +165,7 @@ void generate_statement(struct String* output, union NodeStmt statement){
 		}case _open_bracket:{
 			begin_scope();
 			for(int i=0; i<statement.scope.size; i++)
-				generate_statement(output,at(statement.scope,i));
+				gen_statement(output,statement.scope,i);
 			end_scope(output);
 			break;
 		}case _if:{
@@ -166,7 +176,19 @@ void generate_statement(struct String* output, union NodeStmt statement){
 			pushback_string(*output,"	jz lbl%d\n",lbl_num);
 			begin_scope();
 			for(int i=0; i<statement.if_stmt.scope.size; i++)
-				generate_statement(output,at(statement.if_stmt.scope,i));
+				gen_statement(output,statement.if_stmt.scope,i);
+			end_scope(output);
+			if(next != NULL && next->type == _else){
+				pushback_string(*output,"	jmp lbl%d\n",lbl_count);
+			}create_label(output,lbl_num);
+			break;
+		}case _else:{
+			if(last == NULL) error("Missing \"if\" before \"else\" statement!");
+			if(last->type != _if) error("Missing \"if\" before \"else\" statement!");
+			int lbl_num=lbl_count++;
+			begin_scope();
+			for(int i=0; i<statement.else_stmt.scope.size; i++)
+				gen_statement(output,statement.else_stmt.scope,i);
 			end_scope(output);
 			create_label(output,lbl_num);
 			break;
@@ -193,7 +215,7 @@ char* generate_assembly(struct NodeProg prog){
 	
 	// Go through each parsed statement and generate the according assembly
 	for(int i=0; i<prog.size; i++){
-		generate_statement(&output,at(prog,i));
+		gen_statement(&output,prog,i);
 	}
 	
 	// Add the exit code at the end in case no obliterate was used in the program

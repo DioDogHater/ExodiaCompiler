@@ -1,17 +1,27 @@
-int x = 0;
-
-x = 5*5+1-22;
-int y = (2+2)*4+(-5);
-
-if(1){
-	int z = x*y;
-	if(0){
-		obliterate(z-y);
-	}
-	if(1){
-		z = z+2;
+int x = (-5)*2+100;
+int y = x % 5;
+// y = 0
+if(y){
+	obliterate(y);
+}else{
+	// x = 90 / 18 = 5
+	x = x / 18;
+	
+	// y = 0 + 5 = 5
+	y = y + 5;
+	
+	// z = 5 * 2 - 5 = 5
+	int z = x*2-y;
+	
+	// 5 - 5 = 0
+	if(x-y){
 		obliterate(z);
 	}
 }
 
-obliterate(y-x);
+/*
+ x - 25 = 5 - 25 = -20
+ y * 10 = 5 * 10 = 50
+ -20 + 50 = 30
+*/
+obliterate(x-25+y*10);

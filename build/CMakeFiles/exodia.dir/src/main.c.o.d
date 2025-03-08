@@ -1,7 +1,7 @@
 CMakeFiles/exodia.dir/src/main.c.o: \
- /mnt/c/Users/chris/OneDrive/Documents/Code/C-C++/Exodia/src/main.c \
+ /mnt/c/Users/14389/Desktop/Code/Github/ExodiaCompiler/src/main.c \
  /usr/include/stdc-predef.h \
- /mnt/c/Users/chris/OneDrive/Documents/Code/C-C++/Exodia/src/exolib.h \
+ /mnt/c/Users/14389/Desktop/Code/Github/ExodiaCompiler/src/exolib.h \
  /usr/include/stdio.h \
  /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
  /usr/include/features.h /usr/include/features-time64.h \
@@ -54,6 +54,6 @@ CMakeFiles/exodia.dir/src/main.c.o: \
  /usr/include/x86_64-linux-gnu/bits/types/locale_t.h \
  /usr/include/x86_64-linux-gnu/bits/types/__locale_t.h \
  /usr/include/strings.h /usr/include/ctype.h \
- /mnt/c/Users/chris/OneDrive/Documents/Code/C-C++/Exodia/src/tokenization.h \
- /mnt/c/Users/chris/OneDrive/Documents/Code/C-C++/Exodia/src/parser.h \
- /mnt/c/Users/chris/OneDrive/Documents/Code/C-C++/Exodia/src/generation.h
+ /mnt/c/Users/14389/Desktop/Code/Github/ExodiaCompiler/src/tokenization.h \
+ /mnt/c/Users/14389/Desktop/Code/Github/ExodiaCompiler/src/parser.h \
+ /mnt/c/Users/14389/Desktop/Code/Github/ExodiaCompiler/src/generation.h

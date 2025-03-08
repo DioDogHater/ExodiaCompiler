@@ -49,6 +49,10 @@ struct NodeStmtIf{
 	union NodeExpr expr;
 	struct NodeStmtScope scope;
 };
+struct NodeStmtElse{
+	enum TokenType type;
+	struct NodeStmtScope scope;
+};
 
 // Statement node, basically a single line of code
 union NodeStmt{
@@ -58,6 +62,7 @@ union NodeStmt{
 	struct NodeStmtVarAssign var_assign;
 	struct NodeStmtScope scope;
 	struct NodeStmtIf if_stmt;
+	struct NodeStmtElse else_stmt;
 };
 
 // Basically a vector of statement nodes
@@ -108,6 +113,9 @@ struct NodeStmtScope parse_scope(){
 		union NodeStmt sub_statement;
 		if(parse_statement(&sub_statement)){
 			pushback(scope_node,sub_statement);
+		}else{
+			printf("invalid token: %d, \"%s\"\n",peek().type,peek().value);
+			error("Invalid statement!");
 		}
 	}if(!in_tks()) error("Missing '}' after start of scope!");
 	consume();
@@ -181,6 +189,7 @@ bool parse_statement(union NodeStmt* statement){
 		else error("Missing ';'!");
 		exit_node.type=_obliterate;
 		*statement=(union NodeStmt){.exit=exit_node};
+		return true;
 	}else if(get_token(_int_dcl)){
 		struct NodeStmtIntDcl dcl_node; consume();
 		if(get_token(_identifier)) dcl_node.identifier=consume();
@@ -193,17 +202,19 @@ bool parse_statement(union NodeStmt* statement){
 		else error("Missing ';'!");
 		dcl_node.type=_int_dcl;
 		*statement=(union NodeStmt){.int_dcl=dcl_node};
+		return true;
 	}else if(get_token(_identifier)){
 		struct NodeStmtVarAssign assign_node;
 		assign_node.identifier=consume();
 		if(get_token(_equal_sign)) consume();
-		else error("Missing '='!");
+		else error("Identifier without valid statement!");
 		if(!parse_expr(&assign_node.expr,0))
 			error("Invalid expression!");
 		if(get_token(_semicolon)) consume();
 		else error("Missing ';'!");
 		assign_node.type=_equal_sign;
 		*statement=(union NodeStmt){.var_assign=assign_node};
+		return true;
 	}else if(get_token(_if)){
 		struct NodeStmtIf if_stmt;
 		if_stmt.type=_if; consume();
@@ -215,11 +226,18 @@ bool parse_statement(union NodeStmt* statement){
 		else error("Missing ')'!");
 		if_stmt.scope=parse_scope();
 		*statement=(union NodeStmt){.if_stmt=if_stmt};
+		return true;
+	}else if(get_token(_else)){
+		struct NodeStmtElse else_stmt;
+		else_stmt.type=_else; consume();
+		else_stmt.scope=parse_scope();
+		*statement=(union NodeStmt){.else_stmt=else_stmt};
+		return true;
 	}else if(get_token(_open_bracket)){
 		*statement=(union NodeStmt){.scope=parse_scope()};
-	}else
-		return false;
-	return true;
+		return true;
+	}
+	return false;
 }
 
 // Parse through all statements
@@ -231,7 +249,7 @@ void parse(struct NodeProg* prog){
 		if(parse_statement(&statement)){
 			pushback(*prog,statement);
 		}else{
-			printf("invalid statement token: %d, %s\n",peek().type,peek().value);
+			printf("invalid token: %d, \"%s\"\n",peek().type,peek().value);
 			error("invalid statement!");
 		}
 	}
