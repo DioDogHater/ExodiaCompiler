@@ -228,14 +228,25 @@ void generate_statement(struct String* output, union NodeStmt statement, union N
 			}create_label(output,lbl_num);
 			break;
 		}case _else:{
-			if(last == NULL) error("Missing \"if\" before \"else\" statement!");
-			if(last->type != _if) error("Missing \"if\" before \"else\" statement!");
+			if(last == NULL || last->type != _if) error("Missing \"if\" before \"else\" statement!");
 			int lbl_num=++lbl_count;
 			begin_scope();
 			for(int i=0; i<statement.else_stmt.scope.size; i++)
 				gen_statement(output,statement.else_stmt.scope,i);
 			end_scope(output);
 			create_label(output,lbl_num);
+			break;
+		}case _while:{
+			int loop_lbl_num=++lbl_count;
+			int end_lbl_num=++lbl_count;
+			create_label(output,loop_lbl_num);
+			gen_condition(output,statement.while_stmt.expr,end_lbl_num);
+			begin_scope();
+			for(int i=0; i<statement.while_stmt.scope.size; i++)
+				gen_statement(output,statement.while_stmt.scope,i);
+			end_scope(output);
+			pushback_string(*output,"	jmp lbl%d\n",loop_lbl_num);
+			create_label(output,end_lbl_num);
 			break;
 		}default:
 			error("unimplemented statement type!");

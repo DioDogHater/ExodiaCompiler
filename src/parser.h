@@ -50,7 +50,12 @@ struct NodeStmtIf{
 	struct NodeStmtScope scope;
 };
 struct NodeStmtElse{
-	enum TokenType type;
+	enum TokenType type;// _else
+	struct NodeStmtScope scope;
+};
+struct NodeStmtWhile{
+	enum TokenType type;// _while
+	union NodeExpr expr;
 	struct NodeStmtScope scope;
 };
 
@@ -63,6 +68,7 @@ union NodeStmt{
 	struct NodeStmtScope scope;
 	struct NodeStmtIf if_stmt;
 	struct NodeStmtElse else_stmt;
+	struct NodeStmtWhile while_stmt;
 };
 
 // Basically a vector of statement nodes
@@ -110,8 +116,8 @@ bool parse_statement(union NodeStmt* statement);
 
 // Parse a scope
 struct NodeStmtScope parse_scope(){
-	consume();
 	struct NodeStmtScope scope_node={_open_bracket,NULL,0};
+	consume(); // Consume the '{'
 	while(in_tks() && !get_token(_close_bracket)){
 		union NodeStmt sub_statement;
 		if(parse_statement(&sub_statement)){
@@ -127,18 +133,23 @@ struct NodeStmtScope parse_scope(){
 
 // Parse a term (literal or identifier)
 bool parse_term_expr(union NodeExpr* expr_node){
-	if(get_token(_int_lit)){ // Positive integer literals
+	if(!in_tks()) return false;
+	switch(peek().type){
+	case _int_lit:{ // Positive integer literals
 		*expr_node=(union NodeExpr){.int_lit=consume()};
-	}else if(get_token(_sub)){ // Negation
+		break;
+	}case _sub:{ // Negation
 		consume();
 		union NodeExpr lhs;
 		if(!parse_expr(&lhs,0)) error("Expected expression!");
 		expr_node->bin_expr=(struct NodeBinExpr){_bin_expr,_negation,NULL,NULL};
 		expr_node->bin_expr.lhs=(union NodeExpr*)arena_alloc(&node_alloc,sizeof(union NodeExpr));
 		*expr_node->bin_expr.lhs=lhs;
-	}else if(get_token(_identifier)){
+		break;
+	}case _identifier:{
 		*expr_node=(union NodeExpr){.identifier=consume()};
-	}else if(get_token(_open_paren)){
+		break;
+	}case _open_paren:{
 		consume();
 		union NodeExpr lhs;
 		if(!parse_expr(&lhs,0)) error("Expected expression!");
@@ -147,9 +158,10 @@ bool parse_term_expr(union NodeExpr* expr_node){
 		expr_node->bin_expr=(struct NodeBinExpr){_bin_expr,_open_paren,NULL,NULL};
 		expr_node->bin_expr.lhs=(union NodeExpr*)arena_alloc(&node_alloc,sizeof(union NodeExpr));
 		*expr_node->bin_expr.lhs=lhs;
-	}else
+		break;
+	}default:
 		return false;
-	return true;
+	}return true;
 }
 
 // Get expression if available
@@ -219,7 +231,9 @@ bool parse_condition(union NodeExpr* expr_node){
 
 // Get statement if available
 bool parse_statement(union NodeStmt* statement){
-	if(get_token(_obliterate)){
+	if(!in_tks()) return false;
+	switch(peek().type){
+	case _obliterate:{
 		struct NodeStmtExit exit_node; consume();
 		if(get_token(_open_paren)) consume();
 		else error("Missing '('!");
@@ -231,8 +245,8 @@ bool parse_statement(union NodeStmt* statement){
 		else error("Missing ';'!");
 		exit_node.type=_obliterate;
 		*statement=(union NodeStmt){.exit=exit_node};
-		return true;
-	}else if(get_token(_int_dcl)){
+		break;
+	}case _int_dcl:{
 		struct NodeStmtIntDcl dcl_node; consume();
 		if(get_token(_identifier)) dcl_node.identifier=consume();
 		else error("Missing identifier!");
@@ -244,8 +258,8 @@ bool parse_statement(union NodeStmt* statement){
 		else error("Missing ';'!");
 		dcl_node.type=_int_dcl;
 		*statement=(union NodeStmt){.int_dcl=dcl_node};
-		return true;
-	}else if(get_token(_identifier)){
+		break;
+	}case _identifier:{
 		struct NodeStmtVarAssign assign_node;
 		assign_node.identifier=consume();
 		if(get_token(_equal_sign)) consume();
@@ -256,8 +270,8 @@ bool parse_statement(union NodeStmt* statement){
 		else error("Missing ';'!");
 		assign_node.type=_equal_sign;
 		*statement=(union NodeStmt){.var_assign=assign_node};
-		return true;
-	}else if(get_token(_if)){
+		break;
+	}case _if:{
 		struct NodeStmtIf if_stmt;
 		if_stmt.type=_if; consume();
 		if(get_token(_open_paren)) consume();
@@ -268,18 +282,31 @@ bool parse_statement(union NodeStmt* statement){
 		else error("Missing ')'!");
 		if_stmt.scope=parse_scope();
 		*statement=(union NodeStmt){.if_stmt=if_stmt};
-		return true;
-	}else if(get_token(_else)){
+		break;
+	}case _else:{
 		struct NodeStmtElse else_stmt;
 		else_stmt.type=_else; consume();
 		else_stmt.scope=parse_scope();
 		*statement=(union NodeStmt){.else_stmt=else_stmt};
-		return true;
-	}else if(get_token(_open_bracket)){
+		break;
+	}case _while:{
+		struct NodeStmtWhile while_stmt;
+		while_stmt.type=_while; consume();
+		if(get_token(_open_paren)) consume();
+		else error("Missing '('!");
+		if(!parse_condition(&while_stmt.expr))
+			error("Invalid condition!");
+		if(get_token(_close_paren)) consume();
+		else error("Missing ')'!");
+		while_stmt.scope=parse_scope();
+		*statement=(union NodeStmt){.while_stmt=while_stmt};
+		break;
+	}case _open_bracket:{
 		*statement=(union NodeStmt){.scope=parse_scope()};
-		return true;
-	}
-	return false;
+		break;
+	}default:
+		return false;
+	}return true;
 }
 
 // Parse through all statements

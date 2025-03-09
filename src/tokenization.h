@@ -10,6 +10,7 @@ enum TokenType{
 	_identifier,
 	_if,
 	_else,
+	_while,
 	// Symbols
 	_semicolon,
 	_open_paren, _close_paren,
@@ -77,11 +78,12 @@ char* get_cond_jump_opp(enum TokenType type){
 		case _greater_equ:
 			return "jl";
 		case _lower:
-			return "jg";
-		case _lower_equ:
 			return "jge";
+		case _lower_equ:
+			return "jg";
+		default:
+			return NULL;
 	}
-	return NULL;
 }
 
 char* get_cond_jump(enum TokenType type){
@@ -143,6 +145,9 @@ struct TokenVector tokenize(char* str){
 			
 			else if(!strcmp(token_str,"else"))
 				token=(struct Token){_else,NULL};
+			
+			else if(!strcmp(token_str,"while"))
+				token=(struct Token){_while,NULL};
 			
 			// In case of other token, we deduce it's an indentifier and we dont free the token_str buffer
 			else{
