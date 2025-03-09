@@ -21,6 +21,7 @@ enum TokenType{
 	_equal_to, _not_equal,
 	_greater, _greater_equ,
 	_lower, _lower_equ,
+	_AND, _OR,
 	// Types for parsing and generation
 	_bin_expr,
 	_negation // otherwise, substraction will be confused with negation
@@ -247,12 +248,25 @@ struct TokenVector tokenize(char* str){
 						token=(struct Token){_lower,NULL};
 					break;
 				case '!':
-					printf("'%c' == '!'\n",str[i]);
 					if(i+1<str_len && str[i+1] == '='){
 						token=(struct Token){_not_equal,NULL};
 						i++;
 					}else
 						error("stray symbol '!'!");
+					break;
+				case '&':
+					if(i+1<str_len && str[i+1] == '&'){
+						token=(struct Token){_AND,NULL};
+						i++;
+					}else
+						error("stray symbol '&'!");
+					break;
+				case '|':
+					if(i+1<str_len && str[i+1] == '|'){
+						token=(struct Token){_OR,NULL};
+						i++;
+					}else
+						error("stray symbol '|'!");
 					break;
 				default: // We have an undefined token, so throw an error
 					error("stray symbol '%c'!",str[i]);

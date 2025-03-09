@@ -128,15 +128,16 @@ void gen_expr(struct String* output, union NodeExpr expr){
 		error("unknown expression type %d!",expr.type);
 }
 
-void gen_condition(struct String* output, union NodeExpr expr, int lbl_num){
-	// TODO -> add support for boolean operators (&& and ||)
+void gen_comparison(struct String* output, union NodeExpr expr, int lbl_num, bool check_false){
 	if(expr.type != _bin_expr){
 		gen_expr(output,expr);
 		pop_reg(output,"rax");
 		pushback_string(*output,"	test rax, rax\n");
 		pushback_string(*output,"	jz lbl%d\n",lbl_num);
 	}else{
-		char* cmp_instr=get_cond_jump_opp(expr.bin_expr.op);
+		char* cmp_instr;
+		if(check_false) cmp_instr=get_cond_jump_opp(expr.bin_expr.op);
+		else cmp_instr=get_cond_jump(expr.bin_expr.op);
 		if(cmp_instr == NULL){
 			gen_expr(output,expr);
 			pop_reg(output,"rax");
@@ -150,6 +151,21 @@ void gen_condition(struct String* output, union NodeExpr expr, int lbl_num){
 			pushback_string(*output,"	cmp rbx, rax\n");
 			pushback_string(*output,"	%s lbl%d\n",cmp_instr,lbl_num);
 		}
+	}
+}
+
+void gen_condition(struct String* output, union NodeExpr expr, int lbl_num){
+	if(expr.type != _bin_expr) gen_comparison(output,expr,lbl_num,true);
+	else{
+		if(expr.bin_expr.op == _AND){ // AND = check both
+			gen_comparison(output,*expr.bin_expr.lhs,lbl_num,true);
+			gen_comparison(output,*expr.bin_expr.rhs,lbl_num,true);
+		}else if(expr.bin_expr.op == _OR){
+			gen_comparison(output,*expr.bin_expr.lhs,++lbl_count,false);
+			gen_comparison(output,*expr.bin_expr.rhs,lbl_num,true);
+			create_label(output,lbl_count);
+		}else
+			gen_comparison(output,expr,lbl_num,true);
 	}
 }
 
@@ -194,7 +210,7 @@ void generate_statement(struct String* output, union NodeStmt statement, union N
 			end_scope(output);
 			break;
 		}case _if:{
-			int lbl_num=lbl_count++;
+			int lbl_num=++lbl_count;
 			gen_condition(output,statement.if_stmt.expr,lbl_num);
 			begin_scope();
 			for(int i=0; i<statement.if_stmt.scope.size; i++)
@@ -207,7 +223,7 @@ void generate_statement(struct String* output, union NodeStmt statement, union N
 		}case _else:{
 			if(last == NULL) error("Missing \"if\" before \"else\" statement!");
 			if(last->type != _if) error("Missing \"if\" before \"else\" statement!");
-			int lbl_num=lbl_count++;
+			int lbl_num=++lbl_count;
 			begin_scope();
 			for(int i=0; i<statement.else_stmt.scope.size; i++)
 				gen_statement(output,statement.else_stmt.scope,i);

@@ -40,12 +40,12 @@ int main(int argc, char* argv[]){
 	free(f_contents);
 	printf("Finished tokenization!\n");
 	
-	
+	/*
 	printf("\nDEBUG:\n");
 	for(int i=0; i<tokens.size; i++){
 		printf("token #%d\nid: %d\nvalue: %s\n\n",i,at(tokens,i).type,at(tokens,i).value);
 	}
-	
+	*/
 	
 	// Parse through our tokens and create a parse tree
 	set_parse_tokens(tokens);

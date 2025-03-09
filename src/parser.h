@@ -102,6 +102,9 @@ struct ArenaAlloc node_alloc=(struct ArenaAlloc){NULL,0,0};
 // parse_expr() prototype
 bool parse_expr(union NodeExpr* expr_node, int min_prec);
 
+// parse_condition() prototype
+bool parse_condition(union NodeExpr* expr_node);
+
 // parse_statement() prototype
 bool parse_statement(union NodeStmt* statement);
 
@@ -175,8 +178,7 @@ bool parse_expr(union NodeExpr* expr_node, int min_prec){
 	}return false; // If the first token isnt a term, there is no expression
 }
 
-// Get condition if available
-bool parse_condition(union NodeExpr* expr_node){
+bool parse_comparison(union NodeExpr* expr_node){
 	union NodeExpr lhs;
 	union NodeExpr rhs;
 	// Get the left hand side expression
@@ -185,7 +187,7 @@ bool parse_condition(union NodeExpr* expr_node){
 		struct Token op_token=peek();
 		if(get_cond_jump(op_token.type) == NULL) { *expr_node=lhs; return true; }
 		consume();
-		if(!parse_expr(&rhs,0)) error("Expected 2nd expression in condition!");
+		if(!parse_expr(&rhs,0)) error("Expected 2nd expression in comparison!");
 		expr_node->bin_expr=(struct NodeBinExpr){_bin_expr,op_token.type,NULL,NULL};
 		expr_node->bin_expr.lhs=(union NodeExpr*)arena_alloc(&node_alloc,sizeof(union NodeExpr));
 		*expr_node->bin_expr.lhs=lhs;
@@ -194,6 +196,25 @@ bool parse_condition(union NodeExpr* expr_node){
 		return true;
 	}
 	return false;
+}
+
+// Get condition if available
+bool parse_condition(union NodeExpr* expr_node){
+	if(parse_comparison(expr_node)){
+		if(get_token(_AND) || get_token(_OR)){
+			struct Token op_token=consume();
+			union NodeExpr lhs=*expr_node;
+			union NodeExpr rhs;
+			if(!parse_condition(&rhs)) error("Expected comparison!");
+			expr_node->bin_expr=(struct NodeBinExpr){_bin_expr,op_token.type,NULL,NULL};
+			expr_node->bin_expr.lhs=(union NodeExpr*)arena_alloc(&node_alloc,sizeof(union NodeExpr));
+			*expr_node->bin_expr.lhs=lhs;
+			expr_node->bin_expr.rhs=(union NodeExpr*)arena_alloc(&node_alloc,sizeof(union NodeExpr));
+			*expr_node->bin_expr.rhs=rhs;
+		}
+		return true;
+	}else
+		return false;
 }
 
 // Get statement if available
