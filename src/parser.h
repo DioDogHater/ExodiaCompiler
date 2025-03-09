@@ -263,7 +263,7 @@ bool parse_statement(union NodeStmt* statement){
 		if(get_token(_open_paren)) consume();
 		else error("Missing '('!");
 		if(!parse_condition(&if_stmt.expr))
-			error("Invalid expression!");
+			error("Invalid condition!");
 		if(get_token(_close_paren)) consume();
 		else error("Missing ')'!");
 		if_stmt.scope=parse_scope();

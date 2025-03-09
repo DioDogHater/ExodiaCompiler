@@ -122,34 +122,41 @@ void gen_expr(struct String* output, union NodeExpr expr){
 				push_reg(output,"rax");
 				break;
 			default:
-				error("unimplemented binary expression!");
+				error("unimplemented binary expression %d!",expr.bin_expr.op);
 		}
 	}else
 		error("unknown expression type %d!",expr.type);
 }
+
+// gen_condition() prototype
+void gen_condition(struct String* output, union NodeExpr expr, int lbl_num);
 
 void gen_comparison(struct String* output, union NodeExpr expr, int lbl_num, bool check_false){
 	if(expr.type != _bin_expr){
 		gen_expr(output,expr);
 		pop_reg(output,"rax");
 		pushback_string(*output,"	test rax, rax\n");
-		pushback_string(*output,"	jz lbl%d\n",lbl_num);
+		pushback_string(*output,"	%s lbl%d\n",check_false?"jz":"jnz",lbl_num);
 	}else{
 		char* cmp_instr;
 		if(check_false) cmp_instr=get_cond_jump_opp(expr.bin_expr.op);
 		else cmp_instr=get_cond_jump(expr.bin_expr.op);
-		if(cmp_instr == NULL){
+		if(cmp_instr == NULL && expr.bin_expr.op != _OR && expr.bin_expr.op != _AND){
 			gen_expr(output,expr);
 			pop_reg(output,"rax");
 			pushback_string(*output,"	test rax, rax\n");
-			pushback_string(*output,"	jz lbl%d\n",lbl_num);
+			pushback_string(*output,"	%s lbl%d\n",check_false?"jz":"jnz",lbl_num);
 		}else{
-			gen_expr(output,*expr.bin_expr.lhs);
-			gen_expr(output,*expr.bin_expr.rhs);
-			pop_reg(output,"rax");
-			pop_reg(output,"rbx");
-			pushback_string(*output,"	cmp rbx, rax\n");
-			pushback_string(*output,"	%s lbl%d\n",cmp_instr,lbl_num);
+			if(expr.bin_expr.op == _OR || expr.bin_expr.op == _AND)
+				gen_condition(output,expr,lbl_num);
+			else{
+				gen_expr(output,*expr.bin_expr.lhs);
+				gen_expr(output,*expr.bin_expr.rhs);
+				pop_reg(output,"rax");
+				pop_reg(output,"rbx");
+				pushback_string(*output,"	cmp rbx, rax\n");
+				pushback_string(*output,"	%s lbl%d\n",cmp_instr,lbl_num);
+			}
 		}
 	}
 }
