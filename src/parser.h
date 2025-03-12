@@ -60,9 +60,16 @@ struct NodeStmtIf{
 	union NodeExpr expr;
 	struct NodeStmtScope scope;
 };
+struct NodeStmtElseIf{
+	enum TokenType type;// _else_if
+	union NodeExpr expr;
+	struct NodeStmtScope scope;
+	size_t endif;
+};
 struct NodeStmtElse{
 	enum TokenType type;// _else
 	struct NodeStmtScope scope;
+	size_t endif;
 };
 struct NodeStmtWhile{
 	enum TokenType type;// _while
@@ -80,6 +87,7 @@ union NodeStmt{
 	struct NodeStmtVarAssign var_assign;
 	struct NodeStmtScope scope;
 	struct NodeStmtIf if_stmt;
+	struct NodeStmtElseIf elseif_stmt;
 	struct NodeStmtElse else_stmt;
 	struct NodeStmtWhile while_stmt;
 };
@@ -336,6 +344,18 @@ bool parse_statement(union NodeStmt* statement){
 	}case _if:{
 		struct NodeStmtIf if_stmt;
 		if_stmt.type=_if; consume();
+		if(get_token(_open_paren)) consume();
+		else error("Missing '('!");
+		if(!parse_condition(&if_stmt.expr))
+			error("Invalid condition!");
+		if(get_token(_close_paren)) consume();
+		else error("Missing ')'!");
+		if_stmt.scope=parse_scope();
+		*statement=(union NodeStmt){.if_stmt=if_stmt};
+		break;
+	}case _else_if:{
+		struct NodeStmtIf if_stmt;
+		if_stmt.type=_else_if; consume();
 		if(get_token(_open_paren)) consume();
 		else error("Missing '('!");
 		if(!parse_condition(&if_stmt.expr))

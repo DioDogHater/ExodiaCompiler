@@ -288,13 +288,33 @@ void generate_statement(struct String* output, union NodeStmt statement, union N
 			for(int i=0; i<statement.if_stmt.scope.size; i++)
 				gen_statement(output,statement.if_stmt.scope,i);
 			end_scope(output);
-			if(next != NULL && next->type == _else){
-				pushback_string(*output,"	jmp lbl%lu\n",lbl_count);
+			if(next != NULL && (next->type == _else || next->type == _else_if)){
+				pushback_string(*output,"	jmp lbl%lu\n",++lbl_count);
+				if(next->type == _else) next->else_stmt.endif=lbl_count;
+				else next->elseif_stmt.endif=lbl_count;
 			}create_label(output,lbl_num);
 			break;
-		}case _else:{
-			if(last == NULL || last->type != _if) error("Missing \"if\" before \"else\" statement!");
+		}case _else_if:{
+			if(last == NULL || (last->type != _if && last->type != _else_if)) error("Missing \"if\" or \"elseif\" before \"elseif\" statement!");
 			size_t lbl_num=++lbl_count;
+			gen_condition(output,statement.elseif_stmt.expr,lbl_num);
+			begin_scope();
+			for(int i=0; i<statement.if_stmt.scope.size; i++)
+				gen_statement(output,statement.elseif_stmt.scope,i);
+			end_scope(output);
+			if(next != NULL && (next->type == _else || next->type == _else_if)){
+				pushback_string(*output,"	jmp lbl%lu\n",statement.elseif_stmt.endif);
+				if(next->type == _else) next->else_stmt.endif=statement.elseif_stmt.endif;
+				else next->elseif_stmt.endif=statement.elseif_stmt.endif;
+				create_label(output,lbl_num);
+			}else{
+				create_label(output,lbl_num);
+				create_label(output,statement.elseif_stmt.endif);
+			}
+			break;
+		}case _else:{
+			if(last == NULL || (last->type != _if && last->type != _else_if)) error("Missing \"if\" before \"else\" statement!");
+			size_t lbl_num=statement.else_stmt.endif;
 			begin_scope();
 			for(int i=0; i<statement.else_stmt.scope.size; i++)
 				gen_statement(output,statement.else_stmt.scope,i);

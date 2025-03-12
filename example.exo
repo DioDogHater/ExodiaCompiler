@@ -14,21 +14,20 @@ while(x < 50 || y < 0){
 	y = y + 2;
 	
 	// println() prints a string in the console with a new line
-	println("Value of x:");
+	println("Value of x:\n");
 	
 	// printnum() prints a number in the console with a new line
 	printnum(x);
 	
 	// If x is divisible by 10, its a round number
 	if(x % 10 == 0){
-		println("Round number!");
-	}else{
-		// Otherwise, check if the number is between 10 and 20
-		if(x > 10 && x < 20){
-			println("Between 10 and 20");
-		}else{ // Or if the number is odd otherwise
-			if(x % 2 == 1) { println("Odd number..."); }
-		}
+		println("Round number!\n");
+	}// Otherwise, check if the number is between 10 and 20
+	else if(x > 10 && x < 20){
+		println("Between 10 and 20\n");
+	}// Or if the number is odd otherwise
+	else{
+		if(x % 2 == 1) { println("Odd number...\n"); }
 	}
 	
 	/* Multi-line comments are:

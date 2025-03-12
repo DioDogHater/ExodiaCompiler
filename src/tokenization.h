@@ -17,6 +17,7 @@ enum TokenType{
 	_identifier,
 	_if,
 	_else,
+	_else_if,
 	_while,
 	
 	// Symbols
@@ -163,8 +164,15 @@ struct TokenVector tokenize(char* str){
 				continue;
 			}
 			
-			else if(!strcmp(token_str,"if"))
+			else if(!strcmp(token_str,"if")){
+				// check if "if" is after an "else" to see if it should be "else if" instead
+				if(at_back(tokens).type == _else){
+					at_back(tokens).type=_else_if;
+					free(token_str);
+					continue;
+				}
 				token=(struct Token){_if,NULL};
+			}
 			
 			else if(!strcmp(token_str,"else"))
 				token=(struct Token){_else,NULL};
@@ -264,8 +272,11 @@ struct TokenVector tokenize(char* str){
 								token_str[(token_end++)-token_start]=',';
 								token_str[(token_end++)-token_start]='"';
 							}continue;
-						}
-						token_str[(token_end++)-token_start]=str[i++];
+						}else if(i+1<str_len && str[i+1] == '"'){
+							token_str[(token_end++)-token_start]=str[i++];
+							token_str[(token_end++)-token_start]='"';
+							break;
+						}token_str[(token_end++)-token_start]=str[i++];
 					}
 					token_str[token_end-token_start]='\0';
 					token_str=(char*)realloc(token_str,token_end-token_start+1);
