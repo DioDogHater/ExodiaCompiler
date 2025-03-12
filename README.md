@@ -26,6 +26,17 @@ Now what features does this programming language have? Or what features does the
 - Needs to have the *nasm* Assembler installed
 - Needs to have the *GNU Linker* (*aka `ld`*)
 
+# How to build and use
+You will need to use the CMake buider.\
+The executable will be built as `./build/exodia`.
+```
+git clone https://github.com/DioDogHater/ExodiaCompiler
+cd ExodiaCompiler
+mkdir build
+cmake -S . -B ./build
+cmake --build ./build
+```
+
 # Repository specifications
 Read my code if you want, but I won't accept any pull requests or whatever.
 That is simply because I want to write my compiler myself, and with my genius instead of yours.\
