@@ -20,8 +20,8 @@ Now what features does this programming language have? Or what features does the
 - Scopes, Control flow and Loops
 - Standard functions such as `println()`, `printnum()`, `getnum()` and `obliterate()`
 - Mathematical operations such as +, -, \*, \/ and %\
-\
-Ok, well that's cool and all, but what is the current support for this?
+
+# Support
 - Linux only for now
 - Needs to have the *nasm* Assembler installed
 - Needs to have the *GNU Linker* (*aka `ld`*)
