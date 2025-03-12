@@ -1,0 +1,47 @@
+// Currently, all variables are signed 64-bit integers
+int x = 0;
+
+// To use negative numbers, put them in parentheses to avoid calculation errors
+int y = (-50);
+
+// For now, while loops are the only loops that you can use
+while(x < 50 || y < 0){
+	
+	// Add 1 to x
+	x = x + 1;
+	
+	// Add 2 to y
+	y = y + 2;
+	
+	// println() prints a string in the console with a new line
+	println("Value of x:");
+	
+	// printnum() prints a number in the console with a new line
+	printnum(x);
+	
+	// If x is divisible by 10, its a round number
+	if(x % 10 == 0){
+		println("Round number!");
+	}else{
+		// Otherwise, check if the number is between 10 and 20
+		if(x > 10 && x < 20){
+			println("Between 10 and 20");
+		}else{ // Or if the number is odd otherwise
+			if(x % 2 == 1) { println("Odd number..."); }
+		}
+	}
+	
+	/* Multi-line comments are:
+	- Cool
+	- Readable
+	- Free of bugs!
+	-------------------------*/
+}
+
+/* obliterate is the equivalent of exit() in C
+-> It exits the program with the exit code in the parentheses
+-> Exit code can be printed using "echo $?" in the terminal after execution
+-> The exit code is printed as an unsigned integer with a maximum value of 255
+-> It's a reference to Exodia The Forbidden One, an iconic Yu-Gi-Oh! card
+*/
+obliterate(x); // Exit using the value of x

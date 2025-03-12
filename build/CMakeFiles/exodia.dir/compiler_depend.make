@@ -12,6 +12,7 @@ CMakeFiles/exodia.dir/src/main.c.o: /mnt/c/Users/14389/Desktop/Code/Github/Exodi
   /usr/include/features-time64.h \
   /usr/include/features.h \
   /usr/include/stdc-predef.h \
+  /usr/include/stdint.h \
   /usr/include/stdio.h \
   /usr/include/stdlib.h \
   /usr/include/string.h \
@@ -28,6 +29,8 @@ CMakeFiles/exodia.dir/src/main.c.o: /mnt/c/Users/14389/Desktop/Code/Github/Exodi
   /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h \
   /usr/include/x86_64-linux-gnu/bits/select.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
+  /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
+  /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
@@ -57,6 +60,7 @@ CMakeFiles/exodia.dir/src/main.c.o: /mnt/c/Users/14389/Desktop/Code/Github/Exodi
   /usr/include/x86_64-linux-gnu/bits/uintn-identity.h \
   /usr/include/x86_64-linux-gnu/bits/waitflags.h \
   /usr/include/x86_64-linux-gnu/bits/waitstatus.h \
+  /usr/include/x86_64-linux-gnu/bits/wchar.h \
   /usr/include/x86_64-linux-gnu/bits/wordsize.h \
   /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
   /usr/include/x86_64-linux-gnu/gnu/stubs.h \
@@ -64,8 +68,11 @@ CMakeFiles/exodia.dir/src/main.c.o: /mnt/c/Users/14389/Desktop/Code/Github/Exodi
   /usr/include/x86_64-linux-gnu/sys/select.h \
   /usr/include/x86_64-linux-gnu/sys/types.h \
   /usr/lib/gcc/x86_64-linux-gnu/13/include/stdarg.h \
-  /usr/lib/gcc/x86_64-linux-gnu/13/include/stddef.h
+  /usr/lib/gcc/x86_64-linux-gnu/13/include/stddef.h \
+  /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h
 
+
+/usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h:
 
 /usr/lib/gcc/x86_64-linux-gnu/13/include/stddef.h:
 
@@ -73,9 +80,15 @@ CMakeFiles/exodia.dir/src/main.c.o: /mnt/c/Users/14389/Desktop/Code/Github/Exodi
 
 /usr/include/x86_64-linux-gnu/sys/select.h:
 
-/usr/include/x86_64-linux-gnu/bits/stdio_lim.h:
-
 /usr/include/x86_64-linux-gnu/gnu/stubs.h:
+
+/usr/include/x86_64-linux-gnu/gnu/stubs-64.h:
+
+/usr/include/x86_64-linux-gnu/bits/wordsize.h:
+
+/usr/include/x86_64-linux-gnu/bits/wchar.h:
+
+/usr/include/x86_64-linux-gnu/bits/stdint-least.h:
 
 /usr/include/x86_64-linux-gnu/bits/stdint-intn.h:
 
@@ -89,10 +102,6 @@ CMakeFiles/exodia.dir/src/main.c.o: /mnt/c/Users/14389/Desktop/Code/Github/Exodi
 
 /usr/include/x86_64-linux-gnu/bits/typesizes.h:
 
-/usr/include/x86_64-linux-gnu/bits/types.h:
-
-/usr/include/x86_64-linux-gnu/bits/atomic_wide_counter.h:
-
 /mnt/c/Users/14389/Desktop/Code/Github/ExodiaCompiler/src/parser.h:
 
 /usr/include/strings.h:
@@ -103,17 +112,13 @@ CMakeFiles/exodia.dir/src/main.c.o: /mnt/c/Users/14389/Desktop/Code/Github/Exodi
 
 /usr/include/string.h:
 
+/usr/include/x86_64-linux-gnu/bits/stdint-uintn.h:
+
 /usr/include/x86_64-linux-gnu/bits/types/__mbstate_t.h:
-
-/usr/include/x86_64-linux-gnu/gnu/stubs-64.h:
-
-/usr/include/features-time64.h:
 
 /usr/include/stdlib.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/locale_t.h:
-
-/usr/include/x86_64-linux-gnu/bits/wordsize.h:
 
 /mnt/c/Users/14389/Desktop/Code/Github/ExodiaCompiler/src/exolib.h:
 
@@ -129,11 +134,11 @@ CMakeFiles/exodia.dir/src/main.c.o: /mnt/c/Users/14389/Desktop/Code/Github/Exodi
 
 /mnt/c/Users/14389/Desktop/Code/Github/ExodiaCompiler/src/generation.h:
 
-/usr/include/x86_64-linux-gnu/bits/struct_mutex.h:
+/usr/include/features-time64.h:
 
-/usr/include/endian.h:
+/usr/include/stdint.h:
 
-/usr/include/x86_64-linux-gnu/bits/types/timer_t.h:
+/usr/include/x86_64-linux-gnu/bits/timesize.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/cookie_io_functions_t.h:
 
@@ -147,15 +152,27 @@ CMakeFiles/exodia.dir/src/main.c.o: /mnt/c/Users/14389/Desktop/Code/Github/Exodi
 
 /usr/include/x86_64-linux-gnu/bits/libc-header-start.h:
 
-/usr/include/x86_64-linux-gnu/bits/stdlib-float.h:
-
-/usr/include/stdc-predef.h:
-
 /usr/include/x86_64-linux-gnu/bits/types/clockid_t.h:
 
 /usr/include/x86_64-linux-gnu/bits/time64.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/sigset_t.h:
+
+/usr/include/x86_64-linux-gnu/bits/stdio_lim.h:
+
+/usr/include/x86_64-linux-gnu/bits/atomic_wide_counter.h:
+
+/usr/include/x86_64-linux-gnu/bits/types.h:
+
+/usr/include/stdc-predef.h:
+
+/usr/include/x86_64-linux-gnu/bits/stdlib-float.h:
+
+/usr/include/x86_64-linux-gnu/bits/struct_mutex.h:
+
+/usr/include/endian.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/timer_t.h:
 
 /usr/lib/gcc/x86_64-linux-gnu/13/include/stdarg.h:
 
@@ -164,8 +181,6 @@ CMakeFiles/exodia.dir/src/main.c.o: /mnt/c/Users/14389/Desktop/Code/Github/Exodi
 /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h:
 
 /usr/include/x86_64-linux-gnu/bits/thread-shared-types.h:
-
-/usr/include/x86_64-linux-gnu/bits/timesize.h:
 
 /usr/include/x86_64-linux-gnu/sys/cdefs.h:
 

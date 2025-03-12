@@ -1,0 +1,14 @@
+// This program tests the speed of the Exodia Programming Language
+int count = 0;
+
+// Ask the user for the amount of times to repeat the code
+println("Please enter the amount of times to run this code:\n");
+getnum(times);
+
+// Loop this code for a million times
+while(count < times){
+	count = count + 1;
+	printnum(count); // Write the current number
+}
+
+obliterate(0);

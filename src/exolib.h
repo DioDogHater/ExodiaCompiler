@@ -5,6 +5,7 @@
 // Standard libraries
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 #include <ctype.h>
 
@@ -15,17 +16,6 @@
 #define false 0
 
 
-// Types of fixed size integers
-#define uint8 unsigned __int8
-#define uint16 unsigned __int16
-#define uint32 unsigned __int32
-#define uint64 unsigned __int64
-#define int8 __int8
-#define int16 __int16
-#define int32 __int32
-#define int64 __int64
-
-
 // Error message with variadic parameters
 #define error(msg,...) ({fprintf(stderr,"COMPILATION ERROR:\n");fprintf(stderr,(msg),##__VA_ARGS__);fprintf(stderr,"\n\nCOMPILATION FAILED!\n");exit(-1);})
 
@@ -33,13 +23,13 @@
 // A string of characters, represented like a vector
 struct String{
 	char* arr;
-	int size;
+	size_t size;
 };
 
 
 // String macros
 // The amount of characters we append to the string everytime we format the input string
-int _STRING_APPEND=20;
+int _STRING_APPEND=50;
 // Concatenate a formatted or non-formatted string to the end of the string
 #define pushback_string(d,s,...) \
 ({\
@@ -79,18 +69,26 @@ struct ArenaAlloc{
 	char* ptr;
 	size_t pos;
 	size_t size;
+	size_t spacing;
 };
 #define arena_free(a) ({if((a).ptr != NULL) free((a).ptr);(a).ptr=NULL;})
 void arena_init(struct ArenaAlloc* a, size_t sz){
 	if(a->ptr != NULL) free(a->ptr);
 	*a=(struct ArenaAlloc){(char*)malloc(sz),0,sz};
 	if(a->ptr == NULL) error("Arena allocator : failed to allocate %d bytes of memory!\n",(int)sz);
+	memset(a->ptr,0,sz);
 }
-void* arena_alloc(struct ArenaAlloc* a, size_t sz){
-	if(a->ptr == NULL || a->size < 1) return NULL;
+char* arena_alloc(struct ArenaAlloc* a, size_t sz){
+	if(a->ptr == NULL || a->size < 1) error("Arena allocator : trying to allocate NULL memory!");
 	a->pos+=sz;
 	if(a->pos > a->size) { arena_free(*a); error("Arena allocator : memory overflow of %d bytes!\n",(int)(a->pos-a->size)); }
 	return a->ptr+a->pos;
+}
+void arena_dealloc(struct ArenaAlloc* a, size_t sz){
+	if(a->ptr == NULL || a->size < 1 || a->pos-sz < 0) error("Arena allocator : Trying to deallocate non-existant memory!");
+	a->pos-=sz;
+	printf("new pos: %lu\nmem to deallocate: %s\n",a->pos,a->ptr+a->pos);
+	memset(a->ptr+a->pos,0,sz);
 }
 
 // Token handling

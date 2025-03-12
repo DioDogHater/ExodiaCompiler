@@ -3,14 +3,22 @@
 
 // Possible types of tokens
 enum TokenType{
-	// Keywords
+	// Prebuilt functions
 	_obliterate,
-	_int_dcl,
+	_println,
+	_printnum,
+	_getnum,
+	
+	// Declarations, literals and keywords
+	_var_dcl,
 	_int_lit,
+	_str_lit,
+	_char_lit,
 	_identifier,
 	_if,
 	_else,
 	_while,
+	
 	// Symbols
 	_semicolon,
 	_open_paren, _close_paren,
@@ -23,6 +31,7 @@ enum TokenType{
 	_greater, _greater_equ,
 	_lower, _lower_equ,
 	_AND, _OR,
+	
 	// Types for parsing and generation
 	_bin_expr,
 	_negation // otherwise, substraction will be confused with negation
@@ -37,13 +46,14 @@ struct Token{
 // Vector of tokens
 struct TokenVector{
 	struct Token* arr;
-	int size;
+	size_t size;
 };
+
 
 // Free a token vector and the values inside the tokens if they are not null
 void free_token_vector(struct TokenVector vector){
 	if(vector.arr!=NULL){
-		for(int i=0;i<vector.size;i++) { if(vector.arr[i].value!=NULL) free(vector.arr[i].value); }
+		for(int i=0; i<vector.size; i++) { if(at(vector,i).value != NULL) free(at(vector,i).value); }
 		free(vector.arr);
 	}
 }
@@ -125,9 +135,9 @@ struct TokenVector tokenize(char* str){
 			// Start here
 			token_start=i;
 			// End only when we either find a non-alphanumeric character or we reach the end of str
-			while(i<str_len && isalnum(str[i])){
+			do{
 				token_end=++i;
-			}
+			}while(i<str_len && isalnum(str[i]));
 			// Allocate and setup the token string buffer
 			token_str=(char*)malloc(token_end-token_start+1);
 			token_str[token_end-token_start]='\0';
@@ -137,8 +147,21 @@ struct TokenVector tokenize(char* str){
 			if(!strcmp(token_str,"obliterate"))
 				token=(struct Token){_obliterate,NULL};
 			
-			else if(!strcmp(token_str,"int"))
-				token=(struct Token){_int_dcl,NULL};
+			else if(!strcmp(token_str,"println"))
+				token=(struct Token){_println,NULL};
+			
+			else if(!strcmp(token_str,"printnum"))
+				token=(struct Token){_printnum,NULL};
+			
+			else if(!strcmp(token_str,"getnum"))
+				token=(struct Token){_getnum,NULL};
+			
+			else if(!strcmp(token_str,"int") || !strcmp(token_str,"char")){
+				token=(struct Token){_var_dcl,token_str};
+				pushback(tokens,token);
+				token_str=NULL;
+				continue;
+			}
 			
 			else if(!strcmp(token_str,"if"))
 				token=(struct Token){_if,NULL};
@@ -148,6 +171,22 @@ struct TokenVector tokenize(char* str){
 			
 			else if(!strcmp(token_str,"while"))
 				token=(struct Token){_while,NULL};
+			
+			else if(!strcmp(token_str,"true")){
+				token_str[0]='1'; token_str[1]='\0';
+				token=(struct Token){_int_lit,token_str};
+				pushback(tokens,token);
+				token_str=NULL;
+				continue;
+			}
+			
+			else if(!strcmp(token_str,"false")){
+				token_str[0]='0'; token_str[1]='\0';
+				token=(struct Token){_int_lit,token_str};
+				pushback(tokens,token);
+				token_str=NULL;
+				continue;
+			}
 			
 			// In case of other token, we deduce it's an indentifier and we dont free the token_str buffer
 			else{
@@ -209,6 +248,40 @@ struct TokenVector tokenize(char* str){
 					}else
 						token=(struct Token){_equal_sign,NULL};
 					break;
+				case '"':{
+					token_start=++i;
+					token_end=token_start;
+					token_str=(char*)malloc(2048); // Arbitrary value of 2 KB
+					token_str[(token_end++)-token_start]='\"';
+					while(i<str_len && str[i] != '"'){
+						if(str[i] == '\\' && i+1<str_len && str[i+1] == 'n'){
+							token_str[(token_end++)-token_start]='"';
+							token_str[(token_end++)-token_start]=',';
+							token_str[(token_end++)-token_start]='1';
+							token_str[(token_end++)-token_start]='0';
+							i+=2;
+							if(i<str_len && str[i] != '"'){
+								token_str[(token_end++)-token_start]=',';
+								token_str[(token_end++)-token_start]='"';
+							}continue;
+						}
+						token_str[(token_end++)-token_start]=str[i++];
+					}
+					token_str[token_end-token_start]='\0';
+					token_str=(char*)realloc(token_str,token_end-token_start+1);
+					token=(struct Token){_str_lit,token_str};
+					token_str=NULL;
+					break;
+				}case '\'':
+					if(i+1<str_len && i+2<str_len && str[i+2] == '\''){
+						token_str=(char*)malloc(2);
+						token_str[0]=str[++i]; token_str[1]='\0';
+						token=(struct Token){_char_lit,token_str};
+						token_str=NULL;
+						i++;
+					}else
+						error("Invalid char literal!");
+					break;
 				case '+':
 					token=(struct Token){_add,NULL};
 					break;
@@ -225,7 +298,7 @@ struct TokenVector tokenize(char* str){
 					}else if(i+1<str_len && str[i+1] == '*'){
 						i+=2; // Skip the "/*"
 						while(i<str_len && i+1<str_len && str[i] != '*' || str[i+1] != '/') i++; // Skip until we reach the * of "*/"
-						i+=2; // Skip the last slash
+						i++; // Skip the last slash
 					}else
 						token=(struct Token){_div,NULL};
 					break;

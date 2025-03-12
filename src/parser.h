@@ -17,6 +17,8 @@ struct NodeBinExpr{
 union NodeExpr{
 	enum TokenType type; // See tokenization.h
 	struct Token int_lit;//         -> _int_lit
+	struct Token str_lit;//			-> _str_lit
+	struct Token char_lit;//		-> _char_lit
 	struct Token identifier;//      -> _identifier
 	struct NodeBinExpr bin_expr;//  -> _bin_expr
 };
@@ -29,8 +31,17 @@ struct NodeStmtExit{
 	enum TokenType type;// _obliterate
 	union NodeExpr expr;
 };
-struct NodeStmtIntDcl{
-	enum TokenType type;// _int_dcl
+struct NodeStmtPrint{
+	enum TokenType type;// _print
+	union NodeExpr expr;
+};
+struct NodeStmtGetNum{
+	enum TokenType type;
+	struct Token identifier;
+};
+struct NodeStmtVarDcl{
+	enum TokenType type;// _var_dcl
+	struct Token var_type;
 	struct Token identifier;
 	union NodeExpr expr;
 };
@@ -63,7 +74,9 @@ struct NodeStmtWhile{
 union NodeStmt{
 	enum TokenType type;
 	struct NodeStmtExit exit;
-	struct NodeStmtIntDcl int_dcl;
+	struct NodeStmtPrint print;
+	struct NodeStmtGetNum getnum;
+	struct NodeStmtVarDcl var_dcl;
 	struct NodeStmtVarAssign var_assign;
 	struct NodeStmtScope scope;
 	struct NodeStmtIf if_stmt;
@@ -138,6 +151,12 @@ bool parse_term_expr(union NodeExpr* expr_node){
 	case _int_lit:{ // Positive integer literals
 		*expr_node=(union NodeExpr){.int_lit=consume()};
 		break;
+	}case _str_lit:{ // You might be able to do math with the memory address, but its kinda risky since it's a literal
+		*expr_node=(union NodeExpr){.str_lit=consume()};
+		break;
+	}case _char_lit:{
+		*expr_node=(union NodeExpr){.char_lit=consume()};
+		break;
 	}case _sub:{ // Negation
 		consume();
 		union NodeExpr lhs;
@@ -168,6 +187,7 @@ bool parse_term_expr(union NodeExpr* expr_node){
 bool parse_expr(union NodeExpr* expr_node, int min_prec){
 	// Get the expression
 	if(parse_term_expr(expr_node)){
+		if(expr_node->type == _str_lit) error("Expected int expression but got string literal instead!");
 		// While the expression is still getting parsed
 		while(true){
 			if(!in_tks()) break; // If we reach the end of tokens, we finished parsing the expression
@@ -178,6 +198,7 @@ bool parse_expr(union NodeExpr* expr_node, int min_prec){
 			union NodeExpr lhs=*expr_node;
 			union NodeExpr rhs;
 			if(!parse_expr(&rhs,op_prec+1)) error("Expected expression!");
+			if(rhs.type == _str_lit) error("Expected int expression but got string literal instead!");
 			// Setup the binary expression for next parse
 			expr_node->bin_expr=(struct NodeBinExpr){_bin_expr,op_token.type,NULL,NULL};
 			expr_node->bin_expr.lhs=(union NodeExpr*)arena_alloc(&node_alloc,sizeof(union NodeExpr));
@@ -246,8 +267,49 @@ bool parse_statement(union NodeStmt* statement){
 		exit_node.type=_obliterate;
 		*statement=(union NodeStmt){.exit=exit_node};
 		break;
-	}case _int_dcl:{
-		struct NodeStmtIntDcl dcl_node; consume();
+	}case _println:{
+		struct NodeStmtPrint print_node; consume();
+		if(get_token(_open_paren)) consume();
+		else error("Missing '('!");
+		if(!parse_term_expr(&print_node.expr))
+			error("Invalid expression!");
+		if(print_node.expr.type != _str_lit)
+			error("println() expects a string!");
+		if(get_token(_close_paren)) consume();
+		else error("Missing ')'!");
+		if(get_token(_semicolon)) consume();
+		else error("Missing ';'!");
+		print_node.type=_println;
+		*statement=(union NodeStmt){.print=print_node};
+		break;
+	}case _printnum:{
+		struct NodeStmtPrint print_node; consume();
+		if(get_token(_open_paren)) consume();
+		else error("Missing '('!");
+		if(!parse_expr(&print_node.expr,0))
+			error("Invalid expression!");
+		if(get_token(_close_paren)) consume();
+		else error("Missing ')'!");
+		if(get_token(_semicolon)) consume();
+		else error("Missing ';'!");
+		print_node.type=_printnum;
+		*statement=(union NodeStmt){.print=print_node};
+		break;
+	}case _getnum:{
+		struct NodeStmtGetNum getnum_node; consume();
+		if(get_token(_open_paren)) consume();
+		else error("Missing '('!");
+		if(get_token(_identifier)) getnum_node.identifier=consume();
+		else error("Expected identifier in getnum()!");
+		if(get_token(_close_paren)) consume();
+		else error("Missing ')'!");
+		if(get_token(_semicolon)) consume();
+		else error("Missing ';'!");
+		getnum_node.type=_getnum;
+		*statement=(union NodeStmt){.getnum=getnum_node};
+		break;
+	}case _var_dcl:{
+		struct NodeStmtVarDcl dcl_node; dcl_node.var_type=consume();
 		if(get_token(_identifier)) dcl_node.identifier=consume();
 		else error("Missing identifier!");
 		if(get_token(_equal_sign)) consume();
@@ -256,8 +318,8 @@ bool parse_statement(union NodeStmt* statement){
 			error("Invalid expression!");
 		if(get_token(_semicolon)) consume();
 		else error("Missing ';'!");
-		dcl_node.type=_int_dcl;
-		*statement=(union NodeStmt){.int_dcl=dcl_node};
+		dcl_node.type=_var_dcl;
+		*statement=(union NodeStmt){.var_dcl=dcl_node};
 		break;
 	}case _identifier:{
 		struct NodeStmtVarAssign assign_node;
