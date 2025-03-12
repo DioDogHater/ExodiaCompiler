@@ -1,3 +1,0 @@
-/mnt/c/Users/14389/Desktop/Code/Github/ExodiaCompiler/build/CMakeFiles/exodia.dir
-/mnt/c/Users/14389/Desktop/Code/Github/ExodiaCompiler/build/CMakeFiles/edit_cache.dir
-/mnt/c/Users/14389/Desktop/Code/Github/ExodiaCompiler/build/CMakeFiles/rebuild_cache.dir
