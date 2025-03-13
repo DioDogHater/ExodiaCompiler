@@ -19,6 +19,7 @@ enum TokenType{
 	_else,
 	_else_if,
 	_while,
+	_for,
 	
 	// Symbols
 	_semicolon,
@@ -179,6 +180,9 @@ struct TokenVector tokenize(char* str){
 			
 			else if(!strcmp(token_str,"while"))
 				token=(struct Token){_while,NULL};
+			
+			else if(!strcmp(token_str,"for"))
+				token=(struct Token){_for,NULL};
 			
 			else if(!strcmp(token_str,"true")){
 				token_str[0]='1'; token_str[1]='\0';

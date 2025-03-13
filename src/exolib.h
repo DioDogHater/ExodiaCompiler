@@ -82,7 +82,7 @@ char* arena_alloc(struct ArenaAlloc* a, size_t sz){
 	if(a->ptr == NULL || a->size < 1) error("Arena allocator : trying to allocate NULL memory!");
 	a->pos+=sz;
 	if(a->pos > a->size) { arena_free(*a); error("Arena allocator : memory overflow of %d bytes!\n",(int)(a->pos-a->size)); }
-	return a->ptr+a->pos;
+	return a->ptr+a->pos-sz;
 }
 void arena_dealloc(struct ArenaAlloc* a, size_t sz){
 	if(a->ptr == NULL || a->size < 1 || a->pos-sz < 0) error("Arena allocator : Trying to deallocate non-existant memory!");

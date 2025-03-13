@@ -160,7 +160,7 @@ void gen_expr(struct String* output, union NodeExpr expr){
 				error("unimplemented binary expression %d!",expr.bin_expr.op);
 		}break;
 	default:
-		error("unknown expression type %d!",expr.type);
+		error("unknown expression type %d\n",expr.type);
 	}
 }
 
@@ -329,9 +329,22 @@ void generate_statement(struct String* output, union NodeStmt statement, union N
 			begin_scope();
 			for(int i=0; i<statement.while_stmt.scope.size; i++)
 				gen_statement(output,statement.while_stmt.scope,i);
-			end_scope(output);
 			pushback_string(*output,"	jmp lbl%lu\n",loop_lbl_num);
 			create_label(output,end_lbl_num);
+			end_scope(output);
+			break;
+		}case _for:{
+			size_t loop_lbl_num=++lbl_count;
+			size_t end_lbl_num=++lbl_count;
+			begin_scope();
+			generate_statement(output,*statement.for_stmt.var_assign,NULL,NULL);
+			create_label(output,loop_lbl_num);
+			gen_condition(output,statement.for_stmt.expr,end_lbl_num);
+			for(int i=0; i<statement.for_stmt.scope.size; i++)
+				gen_statement(output,statement.for_stmt.scope,i);
+			pushback_string(*output,"	jmp lbl%lu\n",loop_lbl_num);
+			create_label(output,end_lbl_num);
+			end_scope(output);
 			break;
 		}default:
 			error("unimplemented statement type!");

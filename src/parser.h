@@ -76,6 +76,12 @@ struct NodeStmtWhile{
 	union NodeExpr expr;
 	struct NodeStmtScope scope;
 };
+struct NodeStmtFor{
+	enum TokenType type;// _for
+	union NodeExpr expr;
+	union NodeStmt* var_assign;
+	struct NodeStmtScope scope;
+};
 
 // Statement node, basically a single line of code
 union NodeStmt{
@@ -90,6 +96,7 @@ union NodeStmt{
 	struct NodeStmtElseIf elseif_stmt;
 	struct NodeStmtElse else_stmt;
 	struct NodeStmtWhile while_stmt;
+	struct NodeStmtFor for_stmt;
 };
 
 // Basically a vector of statement nodes
@@ -382,6 +389,28 @@ bool parse_statement(union NodeStmt* statement){
 		else error("Missing ')'!");
 		while_stmt.scope=parse_scope();
 		*statement=(union NodeStmt){.while_stmt=while_stmt};
+		break;
+	}case _for:{
+		struct NodeStmtFor for_stmt;
+		for_stmt.type=_for; consume();
+		if(get_token(_open_paren)) consume();
+		else error("Missing '('!");
+		for_stmt.var_assign=(union NodeStmt*)arena_alloc(&node_alloc,sizeof(union NodeStmt));
+		if(!parse_statement(for_stmt.var_assign))
+			error("Invalid assignment/declaration expression in for loop!");
+		if(for_stmt.var_assign->type != _equal_sign && for_stmt.var_assign->type != _var_dcl)
+			error("First statement in for loop must be variable assignment/declaration!");
+		if(!parse_condition(&for_stmt.expr))
+			error("Invalid for loop condition!");
+		if(get_token(_semicolon)) consume();
+		else error("Missing ';'!");
+		union NodeStmt incr_stmt;
+		if(!parse_statement(&incr_stmt)) error("Invalid incrementation statement in for loop!");
+		if(get_token(_close_paren)) consume();
+		else error("Missing ')'!");
+		for_stmt.scope=parse_scope();
+		pushback(for_stmt.scope,incr_stmt);
+		*statement=(union NodeStmt){.for_stmt=for_stmt};
 		break;
 	}case _open_bracket:{
 		*statement=(union NodeStmt){.scope=parse_scope()};
