@@ -1,0 +1,29 @@
+// This program tests the getchar() standard function
+
+println("Enter an invalid digit to quit!\n\n");
+
+// Loop infinitely until we find an invalid digit
+while(true){
+	// Will translate a single digit character into a number
+	println("Please enter a digit from 0 to 9:\n");
+	char c = 0;
+	getchar(c);
+	
+	// Test if input is a digit
+	if(c < '0' || c > '9'){
+		println("Invalid digit!\n");
+		obliterate(1);
+	}
+	
+	// Lets play with characters
+	println("Here is the character you entered plus 2:\n");
+	printchar(''');
+	printchar(c+2);
+	printchar(''');
+	printchar(10); // Newline character
+	
+	// Now lets get the digit by substracting the char with '0'
+	c = c - '0';
+	println("Here is the digit you typed squared:\n");
+	printnum(c*c);
+}

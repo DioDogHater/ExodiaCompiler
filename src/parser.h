@@ -36,7 +36,11 @@ struct NodeStmtPrint{
 	union NodeExpr expr;
 };
 struct NodeStmtGetNum{
-	enum TokenType type;
+	enum TokenType type;// _getnum
+	struct Token identifier;
+};
+struct NodeStmtGetChar{
+	enum TokenType type;// _getchar
 	struct Token identifier;
 };
 struct NodeStmtVarDcl{
@@ -50,7 +54,7 @@ struct NodeStmtVarAssign{
 	struct Token identifier;
 	union NodeExpr expr;
 };
-struct NodeStmtScope{ // Scope, which is like a sub-vector of statements nodes
+struct NodeStmtScope{// Scope, which is like a sub-vector of statements nodes
 	enum TokenType type;// _open_bracket
 	union NodeStmt* arr;
 	int size;
@@ -89,6 +93,7 @@ union NodeStmt{
 	struct NodeStmtExit exit;
 	struct NodeStmtPrint print;
 	struct NodeStmtGetNum getnum;
+	struct NodeStmtGetChar getchar;
 	struct NodeStmtVarDcl var_dcl;
 	struct NodeStmtVarAssign var_assign;
 	struct NodeStmtScope scope;
@@ -310,6 +315,19 @@ bool parse_statement(union NodeStmt* statement){
 		print_node.type=_printnum;
 		*statement=(union NodeStmt){.print=print_node};
 		break;
+	}case _printchar:{
+		struct NodeStmtPrint print_node; consume();
+		if(get_token(_open_paren)) consume();
+		else error("Missing '('!");
+		if(!parse_expr(&print_node.expr,0))
+			error("Invalid expression!");
+		if(get_token(_close_paren)) consume();
+		else error("Missing ')'!");
+		if(get_token(_semicolon)) consume();
+		else error("Missing ';'!");
+		print_node.type=_printchar;
+		*statement=(union NodeStmt){.print=print_node};
+		break;
 	}case _getnum:{
 		struct NodeStmtGetNum getnum_node; consume();
 		if(get_token(_open_paren)) consume();
@@ -322,6 +340,19 @@ bool parse_statement(union NodeStmt* statement){
 		else error("Missing ';'!");
 		getnum_node.type=_getnum;
 		*statement=(union NodeStmt){.getnum=getnum_node};
+		break;
+	}case _getchar:{
+		struct NodeStmtGetChar getchar_node; consume();
+		if(get_token(_open_paren)) consume();
+		else error("Missing '('!");
+		if(get_token(_identifier)) getchar_node.identifier=consume();
+		else error("Expected identifier in getchar()!");
+		if(get_token(_close_paren)) consume();
+		else error("Missing ')'!");
+		if(get_token(_semicolon)) consume();
+		else error("Missing ';'!");
+		getchar_node.type=_getchar;
+		*statement=(union NodeStmt){.getchar=getchar_node};
 		break;
 	}case _var_dcl:{
 		struct NodeStmtVarDcl dcl_node; dcl_node.var_type=consume();

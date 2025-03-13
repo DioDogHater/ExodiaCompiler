@@ -241,6 +241,11 @@ void generate_statement(struct String* output, union NodeStmt statement, union N
 			pop_reg(output,"rax");
 			pushback_string(*output,"	call _printnum\n");
 			break;
+		}case _printchar:{
+			gen_expr(output,statement.print.expr);
+			pop_reg(output,"r12");
+			pushback_string(*output,"	call _printchar\n");
+			break;
 		}case _getnum:{
 			size_t var_index=varmap_contains(var_map,statement.getnum.identifier.value);
 			pushback_string(*output,"	mov rsi, num_str\n	mov rdx, 18\n	call _getstring\n	mov byte [num_str-1+rax], 0\n	mov rdi, num_str\n	call _atoi\n");
@@ -250,6 +255,21 @@ void generate_statement(struct String* output, union NodeStmt statement, union N
 				pushback(var_map,((struct Var){statement.getnum.identifier.value,VAR_INT,var_start}));
 			}else{ // set the value of the variable passed to the result
 				if(at(var_map,var_index).type != VAR_INT) error("getnum() expects an int variable to be passed!");
+				pushback_string(
+					*output,"	mov [rsp+%lu], rax\n",
+					(stack_size-at(var_map,var_index).stack_loc-1)*8
+				);
+			}
+			break;
+		}case _getchar:{
+			size_t var_index=varmap_contains(var_map,statement.getchar.identifier.value);
+			pushback_string(*output,"	call _getchar\n");
+			if(var_index == -1){
+				size_t var_start=stack_size;
+				push_reg(output,"rax");
+				pushback(var_map,((struct Var){statement.getchar.identifier.value,VAR_CHAR,var_start}));
+			}else{
+				if(at(var_map,var_index).type != VAR_CHAR) error("getchar() expects a char variable to be passed!");
 				pushback_string(
 					*output,"	mov [rsp+%lu], rax\n",
 					(stack_size-at(var_map,var_index).stack_loc-1)*8
@@ -373,6 +393,8 @@ char* generate_assembly(struct NodeProg prog){
 	"	sub r9, 1\n	.printbuffer:\n	add r9, 1\n	sub r10, r9\n	add r10, 1\n	mov rax, 1\n	mov rdi, 1\n	mov rsi, r9\n	mov rdx, r10\n	syscall\n	ret\n"
 	);
 	pushback_string(output,"_getstring:\n	mov rax, 0\n	mov rdi, 0\n	syscall\n	ret\n");
+	pushback_string(output,"_getchar:\n	mov rsi, num_str\n	mov rdx, 2\n	call _getstring\n	movzx rax, byte [num_str]\n	ret\n");
+	pushback_string(output,"_printchar:\n	mov [num_str], r12b\n	mov rsi, num_str\n	mov rdx, 1\n	call _println\n	ret\n");
 	pushback_string(output,
 	"_atoi:\n	mov rax, 0\n	.convert:\n	movzx rsi, byte [rdi]\n	test rsi, rsi\n	je .done\n	cmp rsi, 48\n	jl .error\n	cmp rsi, 57\n"
 	"	jg .error\n	sub rsi, 48\n	imul rax, 10\n	add rax, rsi\n	inc rdi\n	jmp .convert\n	.error:\n	mov rsi, atoi_e\n	mov rdx, atoi_elen\n"

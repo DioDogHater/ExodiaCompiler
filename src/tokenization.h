@@ -7,7 +7,9 @@ enum TokenType{
 	_obliterate,
 	_println,
 	_printnum,
+	_printchar,
 	_getnum,
+	_getchar,
 	
 	// Declarations, literals and keywords
 	_var_dcl,
@@ -32,6 +34,7 @@ enum TokenType{
 	_equal_to, _not_equal,
 	_greater, _greater_equ,
 	_lower, _lower_equ,
+	//_lshift, _rshift,
 	_AND, _OR,
 	
 	// Types for parsing and generation
@@ -139,9 +142,9 @@ struct TokenVector tokenize(char* str){
 			// Start here
 			token_start=i;
 			// End only when we either find a non-alphanumeric character or we reach the end of str
-			do{
+			while(i<str_len && isalnum(str[i])){
 				token_end=++i;
-			}while(i<str_len && isalnum(str[i]));
+			};
 			// Allocate and setup the token string buffer
 			token_str=(char*)arena_alloc(&tk_alloc,token_end-token_start+1);
 			token_str[token_end-token_start]='\0';
@@ -157,8 +160,14 @@ struct TokenVector tokenize(char* str){
 			else if(!strcmp(token_str,"printnum"))
 				token=(struct Token){_printnum,NULL};
 			
+			else if(!strcmp(token_str,"printchar"))
+				token=(struct Token){_printchar,NULL};
+			
 			else if(!strcmp(token_str,"getnum"))
 				token=(struct Token){_getnum,NULL};
+			
+			else if(!strcmp(token_str,"getchar"))
+				token=(struct Token){_getchar,NULL};
 			
 			else if(!strcmp(token_str,"int") || !strcmp(token_str,"char")){
 				token=(struct Token){_var_dcl,token_str};

@@ -65,13 +65,11 @@ int main(int argc, char* argv[]){
 	
 	// Assemble the assembly code
 	system("nasm -felf64 out.asm");
-	printf("\nASSEMBLED PROGRAM!\n");
 	
 	// Link the object file
 	system("ld out.o -o out");
-	printf("LINKED PROGRAM!\n");
 	
-	printf("\nCOMPILATION SUCCESS!\n\n");
+	printf("\nCOMPILATION FINISHED!\n\n");
 	
 	return 0;
 }
