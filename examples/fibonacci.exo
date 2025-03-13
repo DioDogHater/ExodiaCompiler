@@ -1,0 +1,28 @@
+// Fibonacci sequence calculator, and for real this time
+
+// Get the user to input n
+println("Please enter a number:\n");
+getnum(n);
+
+// Variables we will be using
+int a = 1;
+int b = 0;
+int curr = 0;
+
+// If n is lower or equals to 1, then just print it right away
+if(n <= 1){
+	println("nth fibonacci number:\n");
+	printnum(n);
+	obliterate(0);
+}
+
+// Now, lets take the iterative approach
+// This approach has a O(n) time complexity and a O(1) space complexity
+for(int i = 2; i <= n; i = i + 1;){
+	curr = a + b;
+	b = a;
+	a = curr;
+}
+
+println("nth fibonacci number:\n");
+printnum(curr);
