@@ -1,10 +1,9 @@
 // This program gives you the nth fibonacci number
-println("Get the nth fibonacci number!\nPlease enter n:\n");
+println("Please enter a number:\n");
 getnum(n);
 int x = n-1;
-
 while(x > 0){
-	n = n + x;
+	n = n * x;
 	x = x - 1;
 }
 

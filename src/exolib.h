@@ -87,7 +87,6 @@ char* arena_alloc(struct ArenaAlloc* a, size_t sz){
 void arena_dealloc(struct ArenaAlloc* a, size_t sz){
 	if(a->ptr == NULL || a->size < 1 || a->pos-sz < 0) error("Arena allocator : Trying to deallocate non-existant memory!");
 	a->pos-=sz;
-	printf("new pos: %lu\nmem to deallocate: %s\n",a->pos,a->ptr+a->pos);
 	memset(a->ptr+a->pos,0,sz);
 }
 

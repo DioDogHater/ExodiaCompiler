@@ -51,13 +51,14 @@ struct TokenVector{
 	size_t size;
 };
 
+// Arena allocator to allocate all memory necessary for tokens
+struct ArenaAlloc tk_alloc=(struct ArenaAlloc){NULL,0,0};
 
 // Free a token vector and the values inside the tokens if they are not null
 void free_token_vector(struct TokenVector vector){
 	if(vector.arr!=NULL){
-		for(int i=0; i<vector.size; i++) { if(at(vector,i).value != NULL) free(at(vector,i).value); }
 		free(vector.arr);
-	}
+	}arena_free(tk_alloc);
 }
 
 // Returns the precedence value of arithmetic operator
@@ -120,6 +121,7 @@ char* get_cond_jump(enum TokenType type){
 struct TokenVector tokenize(char* str){
 	// Length of str
 	size_t str_len=strlen(str);
+	arena_init(&tk_alloc,1024*1024*5); // 5 MB
 	
 	// Vector of tokens to be returned
 	struct TokenVector tokens=(struct TokenVector){NULL,0};
@@ -141,7 +143,7 @@ struct TokenVector tokenize(char* str){
 				token_end=++i;
 			}while(i<str_len && isalnum(str[i]));
 			// Allocate and setup the token string buffer
-			token_str=(char*)malloc(token_end-token_start+1);
+			token_str=(char*)arena_alloc(&tk_alloc,token_end-token_start+1);
 			token_str[token_end-token_start]='\0';
 			memcpy(token_str,str+token_start,token_end-token_start);
 			
@@ -169,7 +171,7 @@ struct TokenVector tokenize(char* str){
 				// check if "if" is after an "else" to see if it should be "else if" instead
 				if(at_back(tokens).type == _else){
 					at_back(tokens).type=_else_if;
-					free(token_str);
+					arena_dealloc(&tk_alloc,token_end-token_start+1);
 					continue;
 				}
 				token=(struct Token){_if,NULL};
@@ -212,7 +214,7 @@ struct TokenVector tokenize(char* str){
 			pushback(tokens,token);
 			
 			// Free buffer and continue to next token
-			free(token_str);
+			arena_dealloc(&tk_alloc,token_end-token_start+1);
 			continue;
 		}
 		// Check for digit composed tokens i.e. integer literals
@@ -224,7 +226,7 @@ struct TokenVector tokenize(char* str){
 				token_end=++i;
 			}
 			// Allocate the buffer and set it up
-			token_str=(char*)malloc(token_end-token_start+1);
+			token_str=(char*)arena_alloc(&tk_alloc,token_end-token_start+1);
 			token_str[token_end-token_start]='\0';
 			memcpy(token_str,str+token_start,token_end-token_start);
 			
@@ -263,7 +265,7 @@ struct TokenVector tokenize(char* str){
 				case '"':{
 					token_start=++i;
 					token_end=token_start;
-					token_str=(char*)malloc(2048); // Arbitrary value of 2 KB
+					token_str=(char*)arena_alloc(&tk_alloc,1024); // Arbitrary value of 1 KB
 					token_str[(token_end++)-token_start]='\"';
 					while(i<str_len && str[i] != '"'){
 						if(str[i] == '\\' && i+1<str_len && str[i+1] == 'n'){
@@ -283,13 +285,13 @@ struct TokenVector tokenize(char* str){
 						}token_str[(token_end++)-token_start]=str[i++];
 					}
 					token_str[token_end-token_start]='\0';
-					token_str=(char*)realloc(token_str,token_end-token_start+1);
+					arena_dealloc(&tk_alloc,1024-(token_end-token_start+1));
 					token=(struct Token){_str_lit,token_str};
 					token_str=NULL;
 					break;
 				}case '\'':
 					if(i+1<str_len && i+2<str_len && str[i+2] == '\''){
-						token_str=(char*)malloc(2);
+						token_str=(char*)arena_alloc(&tk_alloc,2);
 						token_str[0]=str[++i]; token_str[1]='\0';
 						token=(struct Token){_char_lit,token_str};
 						token_str=NULL;
