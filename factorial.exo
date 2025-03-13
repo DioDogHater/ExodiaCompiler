@@ -1,4 +1,4 @@
-// This program gives you the nth fibonacci number
+// This program gives you a number's factorial
 println("Please enter a number:\n");
 getnum(n);
 int x = n-1;
@@ -7,5 +7,5 @@ while(x > 0){
 	x = x - 1;
 }
 
-println("Here is the nth fibonacci number:\n");
+println("Here is the factorial of the number:\n");
 printnum(n);
