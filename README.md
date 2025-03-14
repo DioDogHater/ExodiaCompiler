@@ -16,10 +16,12 @@ Ok, enough with the weird boasting, now let's get to business.
 This programming language does not have a `main()` function, but does use the same logic as python, where the code in the source is ran automatically.\
 Now what features does this programming language have? Or what features does the compiler have?
 - 64-bit Integer values and variables
-- Character values and variables (not fully implemented yet...)
+- Character values and variables
 - Scopes, Control flow and Loops
-- Standard functions such as `println()`, `printnum()`, `getnum()` and `obliterate()`
-- Mathematical operations such as +, -, \*, \/ and %\
+- Conditions and conditional operators (AND and OR as && and ||)
+- Standard functions such as `println()`, `printnum()`, `printchar()`, `getnum()`, `getchar()` and `obliterate()`
+- Mathematical operations such as +, -, \*, \/ and %
+- Mathematical operator precedence
 
 # Support
 - Linux only for now
