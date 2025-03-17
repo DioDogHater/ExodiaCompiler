@@ -7,3 +7,5 @@ getnum(times);
 for(int count = 1; count <= times; count = count + 1;){
 	printnum(count); // Write the current number
 }
+
+println("Finished!\n");
