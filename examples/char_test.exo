@@ -10,7 +10,7 @@ while(true){
 	getchar(c);
 	
 	// Test if input is a digit
-	if(c < '0' || c > '9'){
+	if(c < '0' || c > '9'){
 		println("Invalid digit!\n");
 		obliterate(1);
 	}
