@@ -7,7 +7,7 @@ Here is his github repository holding the project I followed closely, but withou
 [orosmatthew/hydrogen-cpp: A hobby programming language](https://github.com/orosmatthew/hydrogen-cpp)\
 Ok, well now you know I kinda cheated... But wait before thy judgment bestows damage upon my pride, for I have indeed surpassed my Master.\
 Well, I indeed surpassed the one who started my project, because I wrote my own version of the compiler structure he used, except in C.\
-If that ain't convincing enough, if you take a look at his language, it still doesnt have a while loop, printing, input, etc.\
+If that ain't convincing enough, if you take a look at his language, it still doesnt have a while loop, printing, input, etc.
 
 # The Exodia (The Forbidden One) Programming Language
 , or the Exo programming language for short.\
