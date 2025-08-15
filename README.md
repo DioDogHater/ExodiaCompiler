@@ -8,8 +8,6 @@ Here is his github repository holding the project I followed closely, but withou
 Ok, well now you know I kinda cheated... But wait before thy judgment bestows damage upon my pride, for I have indeed surpassed my Master.\
 Well, I indeed surpassed the one who started my project, because I wrote my own version of the compiler structure he used, except in C.\
 If that ain't convincing enough, if you take a look at his language, it still doesnt have a while loop, printing, input, etc.\
-"*Nah I'd win.*", I said nonchalantly as I published this repo.\
-Ok, enough with the weird boasting, now let's get to business.
 
 # The Exodia (The Forbidden One) Programming Language
 , or the Exo programming language for short.\
