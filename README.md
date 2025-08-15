@@ -36,12 +36,3 @@ mkdir build
 cmake -S . -B ./build
 cmake --build ./build
 ```
-
-# Repository specifications
-Read my code if you want, but I won't accept any pull requests or whatever.
-That is simply because I want to write my compiler myself, and with my genius instead of yours.\
-"*Didn't you already cheat bro?*"\
-Now, my answer to this is simple. Please read my code and Matthew's code and now tell me if I copied.\
-I'm just better bro. Also, like mentioned before, I am currently 16 years old, so if my code is a warcrime, please spare your slurs.\
-\
-Thanks for reading, I'm DioDogHater. *(i don't actually hate dogs btw)*
